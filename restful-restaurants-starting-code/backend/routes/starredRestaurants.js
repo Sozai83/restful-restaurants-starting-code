@@ -48,23 +48,96 @@ router.get("/", (req, res) => {
 /**
  * Feature 7: Getting a specific starred restaurant.
  */
+router.get("/:id", (req, res) => {
+  const {id} = req.params;
 
+  const specificStaeeredRestaurantID = STARRED_RESTAURANTS.find(rest => rest.restaurantId == id);
 
+  if(specificStaeeredRestaurantID){
+    const specificStaeeredRestaurant =  ALL_RESTAURANTS.find(
+      (restaurant) => restaurant.id === specificStaeeredRestaurantID.restaurantId
+    );
+    res.json(specificStaeeredRestaurant);
+  }else{
+    res.status(404).send('No such starred restraunt found');
+  }
+  
+});
 
 /**
  * Feature 8: Adding to your list of starred restaurants.
  */
+router.post("/", (req, res) => {
+  const {body} = req;
+  const {id, comment} = body;
+  const newId = uuidv4();
+
+  const isStarred = STARRED_RESTAURANTS.find(rest => rest.restaurantId == id);
+
+  if(!isStarred){
+    const newStarredRestaurant= {
+      id: newId,
+      restaurantId: id,
+      comment: comment ? comment : ""
+    };
+
+    //add the newly starred restaurant to the list
+    STARRED_RESTAURANTS.push(newStarredRestaurant);
+
+    res.json(newStarredRestaurant);
+    console.log(newStarredRestaurant);
+
+  }else{
+    res.status(400).send('The restaurant is already starred.');
+  }
+  
+});
+
 
 
 
 /**
  * Feature 9: Deleting from your list of starred restaurants.
  */
+router.delete("/:id", (req, res) => {
+  const {id} = req.params;
+
+  const newListOfStarredRestaurants = STARRED_RESTAURANTS.filter(rest => rest.id !== id);
+
+  if(newListOfStarredRestaurants.length == STARRED_RESTAURANTS.length){
+    res.sendStatus(404);
+    return
+  }else{
+    STARRED_RESTAURANTS = newListOfStarredRestaurants;
+
+    res.sendStatus(200);
+  }
+
+}); 
+
 
 
 /**
  * Feature 10: Updating your comment of a starred restaurant.
  */
+router.put("/:id", (req, res) => {
+  const {id} = req.params;
+  const {newComment} = req.body;
+  
+  const restaurant = STARRED_RESTAURANTS.find(rest => rest.id == id);
+
+  if(!restaurant){
+    res.sendStatus(404);
+    return
+  }
+  
+  restaurant.comment = newComment ? newComment: "";
+
+  res.sendStatus(200);
+
+
+}); 
+
 
 
 
